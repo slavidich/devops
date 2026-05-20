@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: slavidich-wildcard
+  namespace: apps
+spec:
+  secretName: slavidich-wildcard-tls
+  issuerRef:
+    name: cert-manager-webhook-duckdns-production
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.slavidich.duckdns.org"
+    - "slavidich.duckdns.org"
