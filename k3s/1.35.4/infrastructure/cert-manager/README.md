@@ -7,14 +7,15 @@
 ## Схема
 
 ```text
-Certificate (wildcard)
+Certificate (wildcard, namespace kube-system)
     → cert-manager
         → ACME DNS-01 Challenge (_acme-challenge.slavidich.duckdns.org)
             → webhook cert-manager-webhook-duckdns
                 → DuckDNS API (TXT)
             → Let's Encrypt выдаёт wildcard-сертификат
-        → Secret slavidich-wildcard-tls
-            → Ingress whoami, echo, … (общий secretName)
+        → Secret slavidich-wildcard-tls (kube-system)
+            → Traefik TLSStore default (default TLS для всего кластера)
+            → Ingress whoami, echo, … (без secretName — Traefik подставляет wildcard)
 
 cert-manager Controller (фон)
     → следит за сроком действия
@@ -71,4 +72,10 @@ export KUBECONFIG=~/.kube/k3s-config
 kubectl apply -f infrastructure/cert-manager/wildcard-certificate.yaml
 ```
 
-cert-manager создаст `CertificateRequest` → `Order` → `Challenge`, пройдёт DNS-01 и положит сертификат в Secret `slavidich-wildcard-tls`.
+cert-manager создаст `CertificateRequest` → `Order` → `Challenge`, пройдёт DNS-01 и положит сертификат в Secret `slavidich-wildcard-tls` в `kube-system`.
+
+После wildcard включите default TLS Traefik:
+
+```bash
+kubectl apply -f infrastructure/traefik/default-tls-store.yaml
+```

@@ -50,7 +50,6 @@ spec:
   tls:
     - hosts:
         - echo.slavidich.duckdns.org
-      secretName: slavidich-wildcard-tls
 
   rules:
     - host: echo.slavidich.duckdns.org

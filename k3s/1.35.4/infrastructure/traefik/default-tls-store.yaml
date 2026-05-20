@@ -1,0 +1,10 @@
+# Traefik использует только TLSStore с именем default (namespace kube-system).
+# defaultCertificate — сертификат для HTTPS, если в Ingress нет secretName.
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  defaultCertificate:
+    secretName: slavidich-wildcard-tls
