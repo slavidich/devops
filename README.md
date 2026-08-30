@@ -1,22 +1,14 @@
 # devops
-Данный репозиторий я использую как небольшое хранилище для моей локальной сети 
 
-# dns 
-В качестве днс сервера используется duckdns.org + synology dns server, который переопределяет поддомены на локальные адреса 
+## dns 
+duckdns.org is used as the dns server 
 
-В качестве dns сервера на хост машинах указывается slavidich.duckdns.org (который в свою очередь ведет на 192.168.0.25) 
+slavidich.duckdns.org -> k3s control plane 
 
-Дальше уже dns server на synology ловит запрос и отдаем ему также локальный айпи куда надо 
+I dont have port forwarding on my router so i use dns01 (not http01) to 
+For example, gitlab.slavidich.duckdns.org will direct to my local server
 
-Например gitlab.slavidich.duckdns.org работает таким образом: 
-Сначала днс резолвится slavidich.duckdns.org -> 192.168.0.25 (synology) -> синолоджи отдает айпи -> 192.168.0.30 
-И дальше уже запрос идет на 192.168.0.30 с hostname: gitlab.slavidich.duckdns.org
-
-Был вариант конечно сделать просто самподписной сертификат напримен на home.lan/ условный, а slavidich.duckdns.org вести сразу в k3s чтобы траефик там уже резолвил по хосту, но решил, что проще прописывать днс-сервер
-
-По идее эта схема ломается, если включить впн (так как gitlab.slavidich.duckdns.org отдаст адрес synology, а не хоста с кубером), так что либо впн отключать, либо настроить реверс прокси на synology (такой вариант мне лично не подходит)
-
-# Строение проекта 
+## structure of project 
 
 ```
 repo
