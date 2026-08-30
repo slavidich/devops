@@ -1,0 +1,18 @@
+global:
+  domain: argocd.slavidich.duckdns.org
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+
+    hosts:
+      - argocd.slavidich.duckdns.org
