@@ -8,16 +8,10 @@ slavidich.duckdns.org -> k3s control plane
 I dont have port forwarding on my router so i use dns01 (not http01) to 
 For example, gitlab.slavidich.duckdns.org will direct to my local server
 
-## structure of project 
-
+## argo 
+not connected to argo (maybe later)
 ```
-repo
-├── k3s/version/
-│   ├── apps/
-│   │   ├── test/
-│   │   │   └── values.yaml
-│   │   ├── plex/
-│   │   └── whoami/
-│   ├── infrastructure/
-│   └── secrets/
+infra/argocd 
+infra/cert-manager 
+infra/traefik 
 ```

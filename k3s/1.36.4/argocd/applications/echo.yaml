@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/ТВОЙ_USERNAME/ТВОЙ_REPOSITORY.git
+    repoURL: https://github.com/slavidich/devops.git
     targetRevision: main
     path: k3s/1.36.4/apps/echo
 
