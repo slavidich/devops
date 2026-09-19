@@ -15,7 +15,7 @@ kubectl create secret generic grafana-admin \
 
 ## 2. Helm
 
-Арго сам поднимет в принципе все 
+Арго сам поднимет в принципе все, но вдруг
 
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
