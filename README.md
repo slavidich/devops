@@ -1,17 +1,45 @@
-# devops
+# Homelab DevOps
 
-## dns 
-duckdns.org is used as the dns server 
+Personal homelab on k3s: infrastructure as code on GitHub, GitOps with Argo CD, CI via GitLab in the cluster.
 
-slavidich.duckdns.org -> k3s control plane 
+---
 
-I dont have port forwarding on my router so i use dns01 (not http01) to 
-For example, gitlab.slavidich.duckdns.org will direct to my local server
+## Architecture
 
-## argo 
-not connected to argo (maybe later)
+```text
+Internet
+   │
+   ▼
+DuckDNS  (*.slavidich.duckdns.org)
+   │
+   ▼
+Traefik  (Ingress / TLS)
+   │
+   ├── Argo CD     ← syncs this repo → cluster
+   ├── apps        
+   ├── Postgres
+   ├── GitLab + runners (only for ci/cd pipelines, code will be here)
+   └── Prometheus + Grafana
 ```
-infra/argocd 
-infra/cert-manager 
-infra/traefik 
+
+---
+
+## Repository layout
+
+```text
+k3s/
+  README.md                 # k3s install notes
+  1.36.4/
+    README.md               # bootstrap order
+    infra/                  # cluster infrastructure (Helm values, manifests)
+      argocd/
+      cert-manager/
+      traefik/
+      postgre/
+      prometheus/
+    apps/                   # application manifests
+      whoami/
+    argocd/                 # Argo CD Applications
+      applications/
+      infra/
 ```

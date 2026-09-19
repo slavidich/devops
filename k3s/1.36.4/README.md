@@ -7,12 +7,6 @@ infrastructure/cert-manager   # helm + wildcard-certificate.yaml (Secret в kube
 
 infrastructure/traefik        # TLSStore default — wildcard cert
 
-apps/whoami                   # HTTPS with Traefik default TLS
-
-apps/echo                     # second hostname, also wildcard
-
----
-
 infrastructure/argo-cd
 
---- 
+infrastructure/prometheus  # namespace monitoring + grafana-admin Secret, затем Helm или Argo CD Application
