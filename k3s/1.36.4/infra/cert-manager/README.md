@@ -1,30 +1,28 @@
-# cert-manager + Let's Encrypt (DNS-01) via DuckDNS
+# cert-manager + let's encrypt (dns-01) via duckdns
 
-Automatic certificates on k3s using DNS-01 through the DuckDNS API.
+automatic certificates on k3s using dns-01 through the duckdns api.
 
-`slavidich.duckdns.org` points at a private network, so HTTP-01 does not work: Let's Encrypt cannot fetch a challenge file from a host that is not public. DNS-01 proves ownership by creating a TXT record (`_acme-challenge.slavidich.duckdns.org`) via the DuckDNS token.
+`slavidich.duckdns.org` points at a private network, so http-01 does not work. let's encrypt would have to fetch a challenge file from a public web server, and this network is not public. dns-01 proves ownership by creating a txt record `_acme-challenge.slavidich.duckdns.org` via the duckdns token. let's encrypt checks that record and issues the cert.
 
-## Flow
+flow:
 
 ```text
-Certificate (wildcard, namespace kube-system)
-    → cert-manager
-        → ACME DNS-01 Challenge (_acme-challenge.slavidich.duckdns.org)
-            → webhook cert-manager-webhook-duckdns
-                → DuckDNS API (TXT)
-            → Let's Encrypt issues the wildcard cert
-        → Secret slavidich-wildcard-tls (kube-system)
-            → Traefik TLSStore default (HTTPS for Ingress without tls.secretName)
-            → Ingress whoami, echo, …
+certificate (wildcard, namespace kube-system)
+    -> cert-manager
+        -> acme dns-01 challenge (_acme-challenge.slavidich.duckdns.org)
+            -> webhook cert-manager-webhook-duckdns
+                -> duckdns api (txt)
+            -> let's encrypt issues the wildcard cert
+        -> secret slavidich-wildcard-tls (kube-system)
+            -> traefik tlsstore default (https for ingress without tls.secretName)
+            -> ingress whoami, echo, ...
 
 cert-manager (background)
-    → watches expiry
-    → ~30 days before expiry: repeat DNS-01 and update the Secret
+    -> watches expiry
+    -> ~30 days before expiry: repeat dns-01 and update the secret
 ```
 
----
-
-## 1. Helm repos
+helm repos:
 
 ```bash
 helm repo add jetstack https://charts.jetstack.io
@@ -32,9 +30,7 @@ helm repo add mmontes https://mmontes11.github.io/charts
 helm repo update
 ```
 
----
-
-## 2. Install cert-manager (jetstack)
+install cert-manager (jetstack):
 
 ```bash
 helm install cert-manager jetstack/cert-manager \
@@ -45,11 +41,9 @@ helm install cert-manager jetstack/cert-manager \
   --set 'extraArgs={--dns01-recursive-nameservers-only=true,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}'
 ```
 
-`extraArgs` makes cert-manager check TXT records via public DNS (useful at home without a local recursive resolver).
+`extraArgs` makes cert-manager check txt records via public dns. convenient at home without your own recursive resolver.
 
----
-
-## 3. DuckDNS webhook (mmontes)
+duckdns webhook (mmontes):
 
 ```bash
 helm install cert-manager-webhook-duckdns mmontes/cert-manager-webhook-duckdns \
@@ -61,20 +55,16 @@ helm install cert-manager-webhook-duckdns mmontes/cert-manager-webhook-duckdns \
   --set logLevel=2
 ```
 
----
-
-## 4. Wildcard certificate (one for all services)
-
-Manifest: [`wildcard-certificate.yaml`](wildcard-certificate.yaml)
+wildcard certificate, one for all services. manifest is `wildcard-certificate.yaml`.
 
 ```bash
 export KUBECONFIG=~/.kube/k3s-config
 kubectl apply -f k3s/1.36.4/infra/cert-manager/wildcard-certificate.yaml
 ```
 
-cert-manager creates `CertificateRequest` → `Order` → `Challenge`, completes DNS-01, and stores the cert in Secret `slavidich-wildcard-tls` in `kube-system`.
+cert-manager creates a `CertificateRequest`, then an `Order`, then a `Challenge`, completes dns-01, and stores the cert in secret `slavidich-wildcard-tls` in `kube-system`.
 
-Then enable Traefik default TLS:
+then enable traefik default tls:
 
 ```bash
 kubectl apply -f k3s/1.36.4/infra/traefik/default-tls-store.yaml

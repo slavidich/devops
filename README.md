@@ -1,93 +1,83 @@
-# Homelab DevOps
+# homelab devops
 
-Personal homelab on k3s. This repository is the **platform**: infrastructure as code, GitOps with Argo CD, later CI and a container registry via GitLab in the cluster.
+personal homelab on k3s. this repo is the platform: gitops with argo cd, later ci and a registry via gitlab in the cluster. product code lives in other github repos. gitlab will build images; argo cd deploys them.
 
-Application **source code** lives in separate GitHub repositories. This repo does not host product code.
+`slavidich.duckdns.org` is a public name that points at a private `192.168.0.x` address. the cluster is not on the internet.
 
----
+tls comes from let's encrypt via cert-manager, using dns-01. http-01 would need let's encrypt to fetch a file from a public web server — that cannot work here. dns-01 instead creates a txt record `_acme-challenge.slavidich.duckdns.org` through the duckdns api. let's encrypt checks that and issues a wildcard cert.
 
-## How it works
+two layers.
 
-Two layers:
+bootstrap is once, by hand: cert-manager, traefik tls, argo cd. gitops cannot start until those exist — argo cd needs ingress and tls, and cannot install itself.
 
-1. **Bootstrap** (once, by hand): cert-manager, Traefik TLS, Argo CD itself. GitOps cannot start until these exist.
-2. **GitOps**: Argo CD watches this repo. You change YAML on GitHub → Argo CD applies it to the cluster.
+after that argo cd watches this repo. change yaml on github, it applies to the cluster.
 
-Argo CD is driven by an **App of Apps** tree:
+app of apps: apply `argocd/root.yaml` once. it recursively watches `argocd/applications/` — appprojects (`infra`, `apps`) and child applications. children point at this repo (infra, demo) or, later, other github repos.
 
-- `argocd/root.yaml` is applied once. It points at `argocd/applications/` (recurse).
-- That folder holds **AppProject** objects (`infra`, `apps`) and child **Application** objects.
-- Each child Application points at either this repo (infra, demo apps) or, later, another GitHub repo (portfolio apps).
-- `spec.destination.namespace` is the single source of truth for where resources land. Manifests do not set `metadata.namespace`. Argo CD creates the namespace (`CreateNamespace=true`).
+`spec.destination.namespace` is where resources land. manifests omit `metadata.namespace`. argo cd creates the namespace with `CreateNamespace=true`.
+
+how the pieces relate:
 
 ```text
-GitHub (this repo)
-        │
-        ▼
-   Argo CD  ── root ──► applications/
-                          ├── projects/   AppProject infra, apps
-                          ├── infra/      Prometheus, Postgres, …
-                          ├── demo/       whoami, echo
-                          └── apps/       pointers to other GitHub repos
-        │
-        ▼
+github (this repo)
+        |
+        v
+   argo cd  -- root --> applications/
+                          projects/   appproject infra, apps
+                          infra/      prometheus, postgres, ...
+                          demo/       whoami, echo
+                          apps/       pointers to other github repos
+        |
+        v
       k3s
 ```
 
-Target flow for a real application (not wired yet):
+target flow for a real application (not wired yet):
 
 ```text
-GitHub / app-foo  →  GitLab CI in the cluster  →  GitLab registry
-GitHub / app-foo/deploy  →  Argo CD Application  →  k3s namespace app-foo
+github / app-foo  ->  gitlab ci in the cluster  ->  gitlab registry
+github / app-foo/deploy  ->  argo cd application  ->  k3s namespace app-foo
 ```
 
----
-
-## Architecture
+from the outside:
 
 ```text
-Internet
-   │
-   ▼
-DuckDNS  (*.slavidich.duckdns.org)
-   │
-   ▼
-Traefik  (Ingress / TLS)
-   │
-   ├── Argo CD
-   ├── demo          whoami, echo (Ingress / TLS smoke tests)
-   ├── Postgres
-   ├── GitLab        runners + registry (planned)
-   └── Prometheus + Grafana
+internet
+   |
+   v
+duckdns  (*.slavidich.duckdns.org)
+   |
+   v
+traefik  (ingress / tls)
+   |
+   +-- argo cd
+   +-- demo          whoami, echo (ingress / tls smoke tests)
+   +-- postgres
+   +-- gitlab        runners + registry (planned)
+   +-- prometheus + grafana
 ```
 
----
-
-## Repository layout
+repository layout:
 
 ```text
 k3s/
-  README.md                 # install k3s
+  README.md                 install k3s
   1.36.4/
-    README.md               # bootstrap order
-    infra/                  # Helm values and infra manifests
+    README.md               bootstrap order
+    infra/                  helm values and infra manifests
       argocd/
       cert-manager/
       traefik/
       postgre/
       prometheus/
-    apps/                   # demo app manifests (whoami, echo)
+    apps/                   demo app manifests (whoami, echo)
     argocd/
-      root.yaml             # apply once
+      root.yaml             apply once
       applications/
-        projects/           # AppProject infra, apps
-        infra/              # prometheus, postgres, …
-        demo/               # whoami, echo
-        apps/               # pointers to other GitHub repos
+        projects/           appproject infra, apps
+        infra/              prometheus, postgres, ...
+        demo/               whoami, echo
+        apps/               pointers to other github repos
 ```
 
----
-
-## Bootstrap
-
-See [k3s/1.36.4/README.md](k3s/1.36.4/README.md). Order: cert-manager → Traefik TLSStore → Argo CD Helm → `kubectl apply -f argocd/root.yaml`.
+bootstrap order is in `k3s/1.36.4/README.md`: cert-manager, then traefik tlsstore, then argo cd helm, then `kubectl apply -f argocd/root.yaml`. how argo cd walks the tree after that is in `k3s/1.36.4/argocd/README.md`.

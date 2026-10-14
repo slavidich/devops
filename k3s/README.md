@@ -1,6 +1,6 @@
-# Install k3s
+# install k3s
 
-On the homelab host:
+on the homelab host:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -13,7 +13,7 @@ sudo chmod 600 $HOME/.kube/config
 echo "export KUBECONFIG=~/.kube/config" >> ~/.bashrc
 ```
 
-Copy kubeconfig to the local machine:
+copy kubeconfig to the local machine:
 
 ```bash
 scp sleber@homelab:~/.kube/config ~/.kube/k3s-config

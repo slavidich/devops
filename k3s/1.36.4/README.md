@@ -1,22 +1,23 @@
-# Bootstrap
+# bootstrap
 
 ```bash
 export KUBECONFIG=~/.kube/k3s-config
 ```
 
-Install in this order. These pieces are **not** managed by Argo CD (chicken-and-egg: Argo CD needs Ingress/TLS to be usable).
+install in this order. these pieces are not managed by argo cd. chicken and egg: argo cd needs ingress and tls before it is usable, and it cannot install itself.
 
-1. `infra/cert-manager` — Helm + `wildcard-certificate.yaml` (Secret in `kube-system`)
-2. `infra/traefik` — TLSStore `default` for the wildcard cert
-3. `infra/argocd` — Helm with `values.yaml`
+first `infra/cert-manager`: helm plus `wildcard-certificate.yaml`. the tls secret lands in `kube-system`.
 
-Then start GitOps:
+then `infra/traefik`: tlsstore `default` so traefik uses that wildcard cert for https.
+
+then `infra/argocd`: helm with `values.yaml`.
+
+after that start gitops:
 
 ```bash
 kubectl apply -f argocd/root.yaml
 ```
 
-Secrets Argo CD does not create:
+what happens next is described in `argocd/README.md`.
 
-- `monitoring`: Secret `grafana-admin`
-- `postgres`: Secret `postgres-secret`
+secrets argo cd does not create. grafana wants `grafana-admin` in `monitoring`. postgres wants `postgres-secret` in `postgres`. make those by hand, see the readmes next to prometheus and postgres.

@@ -1,12 +1,12 @@
-# Prometheus + Grafana (kube-prometheus-stack)
+# prometheus + grafana (kube-prometheus-stack)
 
-Helm chart `kube-prometheus-stack`: Prometheus Operator, Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics.
+helm chart `kube-prometheus-stack`: prometheus operator, prometheus, grafana, alertmanager, node-exporter, kube-state-metrics.
 
-Argo CD Application `prometheus` installs the chart. This README is the fallback if you need to install by hand.
+argo cd application `prometheus` installs the chart (version 90.2.0) with `values.yaml` from this folder. disabled scrape of etcd / controller-manager / scheduler / kube-proxy, because on k3s those control-plane components are not exposed the kubeadm way.
 
-## 1. Grafana admin Secret
+this readme is the fallback if you need to install by hand, and the place for the grafana password which argo cd does not create.
 
-Argo CD creates namespace `monitoring`. The Secret is still created by hand:
+grafana admin secret. argo cd creates namespace `monitoring`. the secret is still created by hand:
 
 ```bash
 export KUBECONFIG=~/.kube/k3s-config
@@ -17,7 +17,7 @@ kubectl create secret generic grafana-admin \
   -n monitoring
 ```
 
-## 2. Helm (optional)
+helm, only if argo cd is not doing it:
 
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -29,9 +29,11 @@ helm upgrade --install kps prometheus-community/kube-prometheus-stack \
   -f values.yaml
 ```
 
-## 3. Check
+grafana ingress is `grafana.slavidich.duckdns.org`. check:
 
 ```bash
 kubectl get pods -n monitoring
 kubectl get ingress -n monitoring
 ```
+
+if grafana pods fail to mount `kps-grafana-config-dashboards`, the usual cause is not grafana itself. look at application `prometheus` in argo cd. a typical failure is appproject `infra` refusing a namespace the chart wants (for example `kube-system` for the coredns scrape service). the whole sync then aborts and those configmaps never appear.

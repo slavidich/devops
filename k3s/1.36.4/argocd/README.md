@@ -1,26 +1,14 @@
-# App of Apps
+# app of apps
 
-`root.yaml` is the only Application applied by hand. Argo CD then syncs everything under `applications/` (`directory.recurse: true`).
+`root.yaml` is the only application you apply by hand. after that argo cd watches `applications/` and keeps the cluster in line with git.
 
-Do **not** put `root.yaml` inside `applications/`, or the root app will try to manage itself.
+do not put `root.yaml` inside `applications/`. recurse would pick it up and the root app would try to manage itself.
 
 ```bash
 export KUBECONFIG=~/.kube/k3s-config
 kubectl apply -f k3s/1.36.4/argocd/root.yaml
 ```
 
-## Projects
+root clones this repo, takes every yaml under `applications/` (`directory.recurse: true`) and creates those objects in namespace `argocd`. folder names do not matter. first come appprojects (`sync-wave: "-1"`), then child applications. root only creates tickets. each child then pulls its own `source.path` (or helm chart) and deploys into its own `destination.namespace`. path is where to read, namespace is where to put it. they are not tied to the folder name.
 
-| AppProject | Allowed sources | Allowed namespaces |
-|---|---|---|
-| `default` | used only by `root` (it creates the other projects) | `argocd` |
-| `infra` | this repo + infra Helm charts | `monitoring`, `postgres`, `gitlab`, `kube-system` |
-| `apps` | this repo + `github.com/slavidich/*` | `demo` (add a destination per new app) |
-
-Child Applications must set `spec.project` to `infra` or `apps`. Namespace comes from `spec.destination.namespace` plus `CreateNamespace=true`.
-
-## Adding a portfolio app later
-
-1. Keep source code in its own GitHub repo (`deploy/` manifests, no `metadata.namespace`).
-2. Add an Application YAML under `applications/apps/`.
-3. Add that app's namespace to AppProject `apps` destinations.
+appproject is the permission layer: which git/helm repos an application may use, and which namespaces it may write to. `infra` can write to `monitoring`, `postgres`, `gitlab`, `kube-system`. `apps` can write to `demo`. a child outside that list will not sync. to add a portfolio app later, put an application yaml under `applications/apps/` and add its namespace to project `apps`.

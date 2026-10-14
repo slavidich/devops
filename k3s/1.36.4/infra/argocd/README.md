@@ -1,6 +1,6 @@
-# Install Argo CD
+# install argo cd
 
-Bootstrap only. After this, GitOps is started with `argocd/root.yaml`.
+bootstrap only. this is the helm install of argo cd itself. gitops starts afterwards with `argocd/root.yaml` from the folder next to this one, not with another helm command.
 
 ```bash
 kubectl create namespace argocd
@@ -12,3 +12,5 @@ helm upgrade --install argocd argo/argo-cd \
   --create-namespace \
   -f values.yaml
 ```
+
+`values.yaml` turns on ingress at `argocd.slavidich.duckdns.org` and `server.insecure`, because tls terminates on traefik.
