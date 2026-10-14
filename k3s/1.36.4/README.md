@@ -1,12 +1,22 @@
-# base
-`export KUBECONFIG=~/.kube/k3s-config`
+# Bootstrap
 
-# order
+```bash
+export KUBECONFIG=~/.kube/k3s-config
+```
 
-infrastructure/cert-manager   # helm + wildcard-certificate.yaml (Secret в kube-system)
+Install in this order. These pieces are **not** managed by Argo CD (chicken-and-egg: Argo CD needs Ingress/TLS to be usable).
 
-infrastructure/traefik        # TLSStore default — wildcard cert
+1. `infra/cert-manager` — Helm + `wildcard-certificate.yaml` (Secret in `kube-system`)
+2. `infra/traefik` — TLSStore `default` for the wildcard cert
+3. `infra/argocd` — Helm with `values.yaml`
 
-infrastructure/argo-cd
+Then start GitOps:
 
-infrastructure/prometheus  # namespace monitoring + grafana-admin Secret, затем Helm или Argo CD Application
+```bash
+kubectl apply -f argocd/root.yaml
+```
+
+Secrets Argo CD does not create:
+
+- `monitoring`: Secret `grafana-admin`
+- `postgres`: Secret `postgres-secret`

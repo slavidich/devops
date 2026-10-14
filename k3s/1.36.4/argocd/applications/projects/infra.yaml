@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Cluster infrastructure
+  sourceRepos:
+    - https://github.com/slavidich/devops.git
+    - https://prometheus-community.github.io/helm-charts
+  destinations:
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+    - namespace: postgres
+      server: https://kubernetes.default.svc
+    - namespace: gitlab
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
