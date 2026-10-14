@@ -14,7 +14,7 @@ kubectl apply -f k3s/1.36.4/argocd/root.yaml
 | AppProject | Allowed sources | Allowed namespaces |
 |---|---|---|
 | `default` | used only by `root` (it creates the other projects) | `argocd` |
-| `infra` | this repo + infra Helm charts | `monitoring`, `postgres`, `gitlab` |
+| `infra` | this repo + infra Helm charts | `monitoring`, `postgres`, `gitlab`, `kube-system` |
 | `apps` | this repo + `github.com/slavidich/*` | `demo` (add a destination per new app) |
 
 Child Applications must set `spec.project` to `infra` or `apps`. Namespace comes from `spec.destination.namespace` plus `CreateNamespace=true`.

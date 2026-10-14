@@ -17,6 +17,9 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: gitlab
       server: https://kubernetes.default.svc
+    # kube-prometheus-stack scrapes CoreDNS via a Service in kube-system
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
