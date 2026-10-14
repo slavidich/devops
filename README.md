@@ -24,7 +24,7 @@ github (this repo)
         v
    argo cd  -- root --> applications/
                           projects/   appproject infra, apps
-                          infra/      prometheus, postgres, ...
+                          infra/      prometheus, postgres, keycloak, ...
                           demo/       whoami, echo
                           apps/       pointers to other github repos
         |
@@ -54,6 +54,7 @@ traefik  (ingress / tls)
    +-- demo          whoami, echo (ingress / tls smoke tests)
    +-- postgres
    +-- gitlab        runners + registry (planned)
+   +-- keycloak      oidc
    +-- prometheus + grafana
 ```
 
@@ -70,12 +71,13 @@ k3s/
       traefik/
       postgre/
       prometheus/
+      keycloak/
     apps/                   demo app manifests (whoami, echo)
     argocd/
       root.yaml             apply once
       applications/
         projects/           appproject infra, apps
-        infra/              prometheus, postgres, ...
+        infra/              prometheus, postgres, keycloak, ...
         demo/               whoami, echo
         apps/               pointers to other github repos
 ```

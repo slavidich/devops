@@ -14,3 +14,11 @@ helm upgrade --install argocd argo/argo-cd \
 ```
 
 `values.yaml` turns on ingress at `argocd.slavidich.duckdns.org` and `server.insecure`, because tls terminates on traefik.
+
+unlike grafana and postgres, you do not create the admin secret by hand. helm writes the initial password into `argocd-initial-admin-secret`. user is `admin`:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+echo
+```

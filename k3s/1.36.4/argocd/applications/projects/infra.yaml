@@ -9,11 +9,14 @@ spec:
   description: Cluster infrastructure
   sourceRepos:
     - https://github.com/slavidich/devops.git
-    - https://prometheus-community.github.io/helm-charts
+    - https://prometheus-community.github.io/helm-charts # prometheus grafana stack 
+    - https://codecentric.github.io/helm-charts # keycloak
   destinations:
     - namespace: monitoring
       server: https://kubernetes.default.svc
     - namespace: postgres
+      server: https://kubernetes.default.svc
+    - namespace: keycloak
       server: https://kubernetes.default.svc
     - namespace: gitlab
       server: https://kubernetes.default.svc

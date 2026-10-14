@@ -1,0 +1,82 @@
+fullnameOverride: keycloak
+
+replicas: 1
+
+# single-node k3s: default chart anti-affinity would block a second replica
+affinity: |
+  {}
+
+command:
+  - /opt/keycloak/bin/kc.sh
+  - start
+  - --http-port=8080
+
+http:
+  relativePath: /
+
+proxy:
+  enabled: true
+  # traefik sends X-Forwarded-*, not the Forwarded header
+  mode: xforwarded
+  http:
+    enabled: true
+
+health:
+  enabled: true
+
+metrics:
+  enabled: true
+
+dbchecker:
+  enabled: true
+
+database:
+  vendor: postgres
+  hostname: postgres.postgres.svc.cluster.local
+  port: 5432
+  database: keycloak
+  username: keycloak
+  existingSecret: keycloak
+  existingSecretKey: db-password
+
+extraEnv: |
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: keycloak
+        key: admin-user
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: keycloak
+        key: admin-password
+  - name: KC_HOSTNAME
+    value: https://keycloak.slavidich.duckdns.org
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 768Mi
+  limits:
+    cpu: "1"
+    memory: 1536Mi
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  rules:
+    - host: keycloak.slavidich.duckdns.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - keycloak.slavidich.duckdns.org
+
+serviceMonitor:
+  enabled: true
+  labels:
+    release: kps

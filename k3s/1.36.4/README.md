@@ -20,4 +20,4 @@ kubectl apply -f argocd/root.yaml
 
 what happens next is described in `argocd/README.md`.
 
-secrets argo cd does not create. grafana wants `grafana-admin` in `monitoring`. postgres wants `postgres-secret` in `postgres`. make those by hand, see the readmes next to prometheus and postgres.
+secrets argo cd does not create. grafana wants `grafana-admin` in `monitoring`. postgres wants `postgres-secret` in `postgres`. keycloak wants `keycloak` in `keycloak`. make those by hand, see the readmes next to prometheus, postgres and keycloak.
