@@ -1,6 +1,6 @@
 # keycloak
 
-helm chart `keycloakx` (codecentric): keycloak 26, no bundled postgres. argo cd application `keycloak` installs chart 7.3.2 with `values.yaml` from this folder. users live in keycloak itself. apps (gitlab later) talk oidc to it.
+helm chart `keycloakx` (codecentric): keycloak 26, no bundled postgres. argo cd application `keycloak` installs chart 7.3.2 with `values.yaml` from this folder. users live in keycloak itself. apps talk oidc to it.
 
 create the database first, see `infra/postgre/README.md`. then the secret. argo cd creates namespace `keycloak`. the secret is still created by hand. `db-password` must match the role you created in postgres.
 
@@ -16,4 +16,4 @@ kubectl create secret generic keycloak \
 
 bootstrap admin (`KC_BOOTSTRAP_ADMIN_*`) is only read on the first start, while the database is empty. changing the secret later does not change the admin password.
 
-url: `https://keycloak.slavidich.duckdns.org`. after login, create a realm for apps. do not put gitlab and the rest in `master`.
+url: `https://keycloak.slavidich.duckdns.org`. after login, create a realm for apps. do not put apps in `master`.

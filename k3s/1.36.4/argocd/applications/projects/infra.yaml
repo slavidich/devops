@@ -18,7 +18,9 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: keycloak
       server: https://kubernetes.default.svc
-    - namespace: gitlab
+    - namespace: redis
+      server: https://kubernetes.default.svc
+    - namespace: minio
       server: https://kubernetes.default.svc
     # kube-prometheus-stack scrapes CoreDNS via a Service in kube-system
     - namespace: kube-system

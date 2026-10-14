@@ -44,4 +44,4 @@ from the cluster keycloak talks to:
 - database `keycloak`
 - user `keycloak`
 
-put that password in secret `keycloak`, key `db-password`, in namespace `keycloak`. see `infra/keycloak/README.md`. this instance is shared; the database is not. gitlab later gets the same treatment: another database, another role.
+put that password in secret `keycloak`, key `db-password`, in namespace `keycloak`. see `infra/keycloak/README.md`. this instance is shared; the database is not. the next app gets the same treatment: another database, another role.

@@ -1,6 +1,8 @@
 # homelab devops
 
-personal homelab on k3s. this repo is the platform: gitops with argo cd, later ci and a registry via gitlab in the cluster. product code lives in other github repos. gitlab will build images; argo cd deploys them.
+personal homelab on k3s. this repo is the platform: gitops with argo cd. product code lives in other github repos.
+
+ci is github actions in those repos, not a ci server in the cluster. actions builds the image and pushes it to github container registry (`ghcr.io`). argo cd pulls that image and the deploy manifests into k3s. the registry is github's, so public images sit next to the public repo.
 
 `slavidich.duckdns.org` is a public name that points at a private `192.168.0.x` address. the cluster is not on the internet.
 
@@ -24,7 +26,7 @@ github (this repo)
         v
    argo cd  -- root --> applications/
                           projects/   appproject infra, apps
-                          infra/      prometheus, postgres, keycloak, ...
+                          infra/      prometheus, postgres, keycloak, redis, minio, ...
                           demo/       whoami, echo
                           apps/       pointers to other github repos
         |
@@ -35,8 +37,15 @@ github (this repo)
 target flow for a real application (not wired yet):
 
 ```text
-github / app-foo  ->  gitlab ci in the cluster  ->  gitlab registry
-github / app-foo/deploy  ->  argo cd application  ->  k3s namespace app-foo
+github / app-foo
+        |
+        +-- git + PR + .github/workflows
+        |
+        v
+github actions  ->  ghcr.io/<user>/app-foo
+        |
+        v
+argo cd application  ->  k3s namespace app-foo
 ```
 
 from the outside:
@@ -53,7 +62,8 @@ traefik  (ingress / tls)
    +-- argo cd
    +-- demo          whoami, echo (ingress / tls smoke tests)
    +-- postgres
-   +-- gitlab        runners + registry (planned)
+   +-- redis
+   +-- minio         s3 api + console
    +-- keycloak      oidc
    +-- prometheus + grafana
 ```
@@ -72,12 +82,14 @@ k3s/
       postgre/
       prometheus/
       keycloak/
+      redis/
+      minio/
     apps/                   demo app manifests (whoami, echo)
     argocd/
       root.yaml             apply once
       applications/
         projects/           appproject infra, apps
-        infra/              prometheus, postgres, keycloak, ...
+        infra/              prometheus, postgres, keycloak, redis, minio, ...
         demo/               whoami, echo
         apps/               pointers to other github repos
 ```
