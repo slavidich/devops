@@ -1,9 +1,32 @@
 global:
   domain: argocd.slavidich.duckdns.org
 
+# native oidc. dex is the other sso path and is unused here.
+dex:
+  enabled: false
+
 configs:
+  cm:
+    url: https://argocd.slavidich.duckdns.org
+    # clientSecret below is a key in secret argocd-secret, not the secret itself
+    oidc.config: |
+      name: Keycloak
+      issuer: https://keycloak.slavidich.duckdns.org/realms/infra
+      clientID: argocd
+      clientSecret: $oidc.keycloak.clientSecret
+      refreshTokenThreshold: 2m
+      requestedScopes:
+        - openid
+        - profile
+        - email
   params:
     server.insecure: true
+  rbac:
+    # anyone outside infra-admins gets nothing. local user admin is unaffected.
+    policy.default: ""
+    policy.csv: |
+      g, infra-admins, role:admin
+    scopes: "[groups]"
 
 server:
   ingress:
