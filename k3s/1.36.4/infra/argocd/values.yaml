@@ -11,7 +11,7 @@ configs:
     # clientSecret below is a key in secret argocd-secret, not the secret itself
     oidc.config: |
       name: Keycloak
-      issuer: https://keycloak.slavidich.duckdns.org/realms/infra
+      issuer: https://keycloak.slavidich.duckdns.org/realms/Users
       clientID: argocd
       clientSecret: $oidc.keycloak.clientSecret
       refreshTokenThreshold: 2m
@@ -25,7 +25,7 @@ configs:
     # anyone outside infra-admins gets nothing. local user admin is unaffected.
     policy.default: ""
     policy.csv: |
-      g, infra-admins, role:admin
+      g, argocd-admin-access, role:admin
     scopes: "[groups]"
 
 server:
