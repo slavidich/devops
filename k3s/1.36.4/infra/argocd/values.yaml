@@ -11,7 +11,7 @@ configs:
     # clientSecret below is a key in secret argocd-secret, not the secret itself
     oidc.config: |
       name: Keycloak
-      issuer: https://keycloak.slavidich.duckdns.org/realms/Users
+      issuer: https://keycloak.slavidich.duckdns.org/realms/users
       clientID: argocd
       clientSecret: $oidc.keycloak.clientSecret
       refreshTokenThreshold: 2m
@@ -26,7 +26,7 @@ configs:
     policy.default: ""
     policy.csv: |
       g, argocd-admin-access, role:admin
-    scopes: "[groups]"
+    scopes: "[argocd_roles]" # was resource_access.${client_id}.roles
 
 server:
   ingress:

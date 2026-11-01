@@ -25,7 +25,7 @@ echo
 
 ## keycloak
 
-realm `infra`, client `argocd`, group `infra-admins`. the client is confidential. redirect uri is `https://argocd.slavidich.duckdns.org/auth/callback`. the group membership mapper on scope `argocd-dedicated` puts `groups` in the token, so the oidc config does not request a scope named `groups`.
+realm `users`, client `argocd`. the client is confidential. redirect uri is `https://argocd.slavidich.duckdns.org/auth/callback`. client role `argocd-admin-access` is assigned to groups through role mapping. scope `argocd-dedicated` has a User Client Role mapper that puts this role into `resource_access.argocd.roles`, so the oidc config does not request an extra scope for it.
 
 the client secret is not in git. patch it into the secret helm already created. replace the value with the secret from the client credentials tab:
 
@@ -44,6 +44,6 @@ helm upgrade --install argocd argo/argo-cd \
   -f values.yaml
 ```
 
-`oidc.config` points `clientSecret` at `$oidc.keycloak.clientSecret`, which is that key. members of `infra-admins` get `role:admin`. everyone else in the realm gets no role. the local `admin` user still works.
+`oidc.config` points `clientSecret` at `$oidc.keycloak.clientSecret`, which is that key. rbac reads `resource_access.argocd.roles`, so holders of client role `argocd-admin-access` get `role:admin`. everyone else in the realm gets no role. the local `admin` user still works.
 
 login at `https://argocd.slavidich.duckdns.org` with the button `LOG IN VIA KEYCLOAK`.
